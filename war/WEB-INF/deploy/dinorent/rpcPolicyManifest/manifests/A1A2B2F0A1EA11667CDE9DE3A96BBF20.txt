@@ -1,0 +1,2 @@
+serviceClass: com.dinorent.client.GreetingService
+path: 2483428A8494CE689DE3049F6BA89A9B.gwt.rpc

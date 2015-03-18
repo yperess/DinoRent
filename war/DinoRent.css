@@ -1,0 +1,200 @@
+/** Add css rules here for your application. */
+body {
+	font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif !important;
+}
+
+.TitleBar {
+	width: 100%;
+	height: 56px;
+	position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 100;
+    background: #009933;
+    box-shadow: 0 0 4px rgba(0,0,0,.14),0 4px 8px rgba(0,0,0,.28);
+}
+
+.MenuIcon {
+	background-image: url(/images/ic_menu_wht_1x.png);
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 24px;
+	display: inline-block;
+	height: 24px;
+	opacity: 0.75;
+	padding: 16px 24px;
+	width: 24px;
+	-webkit-user-drag: none;
+	float: left;
+	cursor: pointer;
+}
+
+.MenuIcon:hover {
+	opacity: 1.0;
+}
+
+.Banner {
+	display: block;
+	line-height: 56px;
+	font-size: 1.5em;
+	color: #FFFFFF;
+}
+
+.SignInButton {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	height: 56px;
+	line-height: 56px;
+	padding: 0px 24px;
+	cursor: pointer;
+	font-size: 18px;
+	color: #FFFFFF;
+	opacity: 0.75;
+}
+
+.SignInButton:hover {
+	opacity: 1.0;
+}
+
+.Menu {
+	background:#fff;
+	box-shadow: 0 0 4px rgba(0,0,0,.14),2px 4px 8px rgba(0,0,0,.28);
+	color: #757575;
+	line-height: 40px;
+	overflow-x: hidden;
+	overflow-y: auto;
+	white-space: nowrap;
+	display: none;
+}
+
+.MainMenu {
+	top: 0px;
+	bottom: 0px;
+	width: 232px;
+	position: absolute;
+	padding-top: 56px;
+}
+
+#signInMenu > div.Card {
+	height: 162px;
+}
+
+input {
+	border: 1px solid #d9d9d9;
+}
+
+#sign-in-email,
+#sign-in-password {
+	width: 286px;
+	padding: 0px 8px;
+	height: 36px;
+	font-size: 16px;
+	background-color: rgb(250, 255, 189);
+	display: block;
+}
+
+#sign-in-password {
+	margin-top: -1px;
+	margin-bottom: 10px;
+}
+
+#sign-in {
+	width: 304px;
+	margin-bottom: 20px;
+}
+
+#sign-in-help {
+	float: left;
+}
+
+#sign-in-create-account {
+	float: right;
+}
+
+.ActionButton {
+	text-shadow: 0 1px rgba(0,0,0,0.1);
+	background-color: rgb(77, 144, 254);
+	background-image: -webkit-linear-gradient(top, rgb(77, 144, 254), rgb(71, 135, 237));
+	color: rgb(255, 255, 255);
+	border: 1px solid #3079ed;
+	font-size: 13px;
+	height: 36px;
+	line-height: 36px;
+	font-weight: 700;
+	display: block;
+}
+
+.MainContent {
+	padding-top: 56px;
+}
+
+#loadingScreen {
+	z-index: 1001;
+	display: block;
+}
+
+.FullScreenContainer {
+	position: fixed;
+    top: 0px;
+    left: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 1000;
+	background: rgba(0, 0, 0, 0.15);
+	display: none;
+}
+
+.FullScreenContainer > div:first-child {
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.Card {
+	background-color: #FFFFFF;
+	padding: 20px 25px 30px;
+	margin: 0 auto 25px;
+	width: 304px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	-moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+	-webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+	box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+}
+
+/** Example rules used by the template application (remove for your app) */
+h1 {
+  font-size: 2em;
+  font-weight: bold;
+  color: #777777;
+  margin: 40px 0px 70px;
+  text-align: center;
+}
+
+.sendButton {
+  display: block;
+  font-size: 16pt;
+}
+
+/** Most GWT widgets already have a style name defined */
+.gwt-DialogBox {
+  width: 400px;
+}
+
+.dialogVPanel {
+  margin: 5px;
+}
+
+.serverResponseLabelError {
+  color: red;
+}
+
+/** Set ids using widget.getElement().setId("idOfElement") */
+#closeButton {
+  margin: 15px 6px 6px;
+}

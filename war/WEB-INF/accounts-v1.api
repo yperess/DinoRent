@@ -1,0 +1,208 @@
+{
+  "extends" : "thirdParty.api",
+  "abstract" : false,
+  "root" : "https://dino-rent.appspot.com/_ah/api",
+  "name" : "accounts",
+  "version" : "v1",
+  "description" : "Accounts API",
+  "defaultVersion" : false,
+  "adapter" : {
+    "bns" : "https://dino-rent.appspot.com/_ah/spi",
+    "deadline" : 65.0,
+    "type" : "lily"
+  },
+  "auth" : {
+    "allowCookieAuth" : false
+  },
+  "frontendLimits" : {
+    "unregisteredUserQps" : -1,
+    "unregisteredQps" : -1,
+    "unregisteredDaily" : -1,
+    "rules" : [ ]
+  },
+  "cacheControl" : {
+    "type" : "no-cache",
+    "maxAge" : 0
+  },
+  "methods" : {
+    "accounts.bar" : {
+      "path" : "bar",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.dinorent.server.AccountsApi.bar",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "accounts.createAccount" : {
+      "path" : "createAccount/{emailAddress}/{password}",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.dinorent.server.AccountsApi.createAccount",
+      "request" : {
+        "parameters" : {
+          "emailAddress" : {
+            "type" : "string",
+            "required" : true
+          },
+          "password" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "accounts.signIn" : {
+      "path" : "signIn/{emailAddress}/{password}",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.dinorent.server.AccountsApi.signIn",
+      "request" : {
+        "parameters" : {
+          "emailAddress" : {
+            "type" : "string",
+            "required" : true
+          },
+          "password" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "accounts.validateAccount" : {
+      "path" : "validateAccount/{emailAddress}/{password}/{verificationCode}",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.dinorent.server.AccountsApi.validateAccount",
+      "request" : {
+        "parameters" : {
+          "emailAddress" : {
+            "type" : "string",
+            "required" : true
+          },
+          "password" : {
+            "type" : "string",
+            "required" : true
+          },
+          "verificationCode" : {
+            "type" : "int32",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "accounts.foo" : {
+      "path" : "foo",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.dinorent.server.AccountsApi.foo",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    }
+  },
+  "descriptor" : {
+    "schemas" : {
+      "Foo" : {
+        "id" : "Foo",
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CreateAccountReply" : {
+        "id" : "CreateAccountReply",
+        "type" : "object",
+        "properties" : {
+          "statusCode" : {
+            "type" : "integer"
+          }
+        }
+      },
+      "SignInReply" : {
+        "id" : "SignInReply",
+        "type" : "object",
+        "properties" : {
+          "authToken" : {
+            "type" : "string"
+          },
+          "statusCode" : {
+            "type" : "integer"
+          }
+        }
+      },
+      "ValidateAccountReply" : {
+        "id" : "ValidateAccountReply",
+        "type" : "object",
+        "properties" : {
+          "statusCode" : {
+            "type" : "integer"
+          }
+        }
+      }
+    },
+    "methods" : {
+      "com.dinorent.server.AccountsApi.bar" : {
+        "response" : {
+          "$ref" : "Foo"
+        }
+      },
+      "com.dinorent.server.AccountsApi.createAccount" : {
+        "response" : {
+          "$ref" : "CreateAccountReply"
+        }
+      },
+      "com.dinorent.server.AccountsApi.signIn" : {
+        "response" : {
+          "$ref" : "SignInReply"
+        }
+      },
+      "com.dinorent.server.AccountsApi.validateAccount" : {
+        "response" : {
+          "$ref" : "ValidateAccountReply"
+        }
+      },
+      "com.dinorent.server.AccountsApi.foo" : {
+        "response" : {
+          "$ref" : "Foo"
+        }
+      }
+    }
+  }
+}
