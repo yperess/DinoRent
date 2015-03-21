@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.dinorent.server.util.Properties;
 import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -13,7 +14,7 @@ public class AuthTokenEntity extends EntityContainer {
 	
 	public static final String KIND = "AuthToken";
 	
-	public AuthTokenEntity(String emailAddress, Date date) {
+	public AuthTokenEntity(Email emailAddress, Date date) {
 		super(KIND);
 		setTimestamp(date);
 		setEmailAddress(emailAddress);
@@ -31,29 +32,17 @@ public class AuthTokenEntity extends EntityContainer {
 		return (Date) mEntity.getProperty(Properties.TIMESTAMP);
 	}
 	
-	public void setEmailAddress(String emailAddress) {
+	public void setEmailAddress(Email emailAddress) {
 		mEntity.setProperty(Properties.EMAIL_ADDRESS, emailAddress);
 	}
 	
-	public String getEmailAddress() {
-		return (String) mEntity.getProperty(Properties.EMAIL_ADDRESS);
+	public Email getEmailAddress() {
+		return (Email) mEntity.getProperty(Properties.EMAIL_ADDRESS);
 	}
 	
-	public static AuthTokenEntity findAuthTokenEntity(DatastoreService datastore, String emailAddress) {
+	public static AuthTokenEntity findAuthTokenEntity(DatastoreService datastore, Email emailAddress) {
 		Query query = new Query(AuthTokenEntity.KIND)
 				.setFilter(new FilterPredicate(Properties.EMAIL_ADDRESS, FilterOperator.EQUAL, emailAddress));
 		return new AuthTokenEntity(datastore.prepare(query).asSingleEntity());
-	}
-	
-	public static class InvalidAuthTokenException extends Exception {
-		public InvalidAuthTokenException() {
-			super("Invalid auth token exception");
-		}
-	}
-	
-	public static class AuthTokenExpiredException extends Exception {
-		public AuthTokenExpiredException() {
-			super("Auth token expired exception");
-		}
 	}
 }
