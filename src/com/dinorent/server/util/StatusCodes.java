@@ -1,11 +1,47 @@
 package com.dinorent.server.util;
 
-public interface StatusCodes {
+import com.google.api.server.spi.response.BadRequestException;
+import com.google.api.server.spi.response.InternalServerErrorException;
+import com.google.api.server.spi.response.NotFoundException;
+import com.google.api.server.spi.response.UnauthorizedException;
+
+public class StatusCodes {
 	public static final int OK = 0;
 	
-	// Sign-in status codes.
-	public static final int ACCOUNT_NOT_FOUND = -1;
-	public static final int ACCOUNT_EMAIL_TAKEN = -2;
-	public static final int INCORRECT_VERIFICATION_CODE = -3;
-	public static final int INCORRECT_USERNAME_OR_PASSWORD = -4;
+	// Error messages.
+	public static class InvalidAuthTokenException extends BadRequestException {
+		public InvalidAuthTokenException() {
+			super("Invalid auth token.");
+		}
+	}
+	
+	public static class EmailTakenException extends BadRequestException {
+		public EmailTakenException() {
+			super("Email already in use.");
+		}
+	}
+	
+	public static class IncorrectVerificationCodeException extends BadRequestException {
+		public IncorrectVerificationCodeException() {
+			super("Incorrect verification code.");
+		}
+	}
+	
+	public static class SessionExpiredException extends UnauthorizedException {
+		public SessionExpiredException() {
+			super("Session expired.");
+		}
+	}
+	
+	public static class AccountNotFoundException extends NotFoundException {
+		public AccountNotFoundException() {
+			super("Account not found.");
+		}
+	}
+	
+	public static class GenericInternalError extends InternalServerErrorException {
+		public GenericInternalError() {
+			super("Internal error.");
+		}
+	}
 }

@@ -1,6 +1,5 @@
 package com.dinorent.server.entities;
 
-import com.dinorent.server.util.Preconditions;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.KeyFactory;
 

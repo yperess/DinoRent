@@ -1,24 +1,33 @@
 package com.dinorent.server;
 
-import java.util.Date;
-
-import com.dinorent.server.entities.AccountEntity;
-import com.dinorent.server.entities.AuthTokenEntity;
-import com.dinorent.server.entities.AuthTokenEntity.AuthTokenExpiredException;
-import com.dinorent.server.entities.AuthTokenEntity.InvalidAuthTokenException;
-import com.dinorent.server.entities.PendingAccountEntity;
-import com.dinorent.server.replies.CreateAccountReply;
-import com.dinorent.server.replies.SignInReply;
-import com.dinorent.server.replies.ValidateAccountReply;
-import com.dinorent.server.util.StatusCodes;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.KeyFactory;
-
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withLimit;
 
+import java.util.Date;
+import java.util.Random;
+
+import com.dinorent.server.entities.AccountEntity;
+import com.dinorent.server.entities.AccountEntity.AccountType;
+import com.dinorent.server.entities.AuthTokenEntity;
+import com.dinorent.server.entities.PasswordResetEntity;
+import com.dinorent.server.entities.PendingAccountEntity;
+import com.dinorent.server.replies.BaseReply;
+import com.dinorent.server.replies.GetAccountReply;
+import com.dinorent.server.replies.SignInReply;
+import com.dinorent.server.util.StatusCodes;
+import com.dinorent.server.util.StatusCodes.AccountNotFoundException;
+import com.dinorent.server.util.StatusCodes.EmailTakenException;
+import com.dinorent.server.util.StatusCodes.GenericInternalError;
+import com.dinorent.server.util.StatusCodes.IncorrectVerificationCodeException;
+import com.dinorent.server.util.StatusCodes.InvalidAuthTokenException;
+import com.dinorent.server.util.StatusCodes.SessionExpiredException;
+import com.google.api.server.spi.ServiceException;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Email;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PhoneNumber;
+import com.google.appengine.api.datastore.PostalAddress;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -42,6 +51,16 @@ public class AccountsApiTest {
     	protected Date getDate() {
     		return mNow;
     	}
+    	
+    	@Override
+    	protected void sendVerificationEmail(PendingAccountEntity pendingAccount) {
+    		// Do nothing.
+    	}
+    	
+    	@Override
+    	protected void sendVerificationEmail(PasswordResetEntity passwordReset) {
+    		// Do nothing.
+    	}
     };
 
     @Before
@@ -59,173 +78,406 @@ public class AccountsApiTest {
     public void testSignIn_noAccount() {
     	final String emailAddress = "test@domain.com";
     	final String password = "12345";
-    	SignInReply reply = mAccountsApi.signIn(emailAddress, password);
-    	assertEquals(StatusCodes.ACCOUNT_NOT_FOUND, reply.getStatusCode());
+    	try {
+    		SignInReply reply = mAccountsApi.signIn(emailAddress, password);
+    		fail();
+    	} catch (StatusCodes.AccountNotFoundException ex) {
+    		// Expected path.
+    	}
     }
     
     @Test
-    public void testSignIn_success() throws EntityNotFoundException {
-    	final String emailAddress = "test@domain.com";
+    public void testSignIn_success() throws EntityNotFoundException, AccountNotFoundException {
+    	final Email email = new Email("test@domain.com");
     	final String password = "12345";
-    	insertAccount(emailAddress, password);
-    	SignInReply reply = mAccountsApi.signIn(emailAddress, password);
+    	insertAccount(email, password);
+    	SignInReply reply = mAccountsApi.signIn(email.getEmail(), password);
     	
-    	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     	assertEquals(StatusCodes.OK, reply.getStatusCode());
     	assertNotNull(reply.getAuthToken());
-    	AuthTokenEntity authToken = new AuthTokenEntity(datastore.get(KeyFactory.stringToKey(reply.getAuthToken())));
+    	AuthTokenEntity authToken = new AuthTokenEntity(getDatastore().get(
+    			KeyFactory.stringToKey(reply.getAuthToken())));
     	assertNotNull(authToken.getEntity());
-    	assertEquals(emailAddress, authToken.getEmailAddress());
+    	assertEquals(email, authToken.getEmailAddress());
     }
     
     @Test
-    public void testValidateAuthToken_notFound() {
-    	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    	final String emailAddress = "test@domain.com";
-    	final String authToken = insertAuthToken(emailAddress, mNow);
+    public void testValidateAuthToken_notFound() throws SessionExpiredException, AccountNotFoundException {
+    	DatastoreService datastore = getDatastore();
+    	final Email email = new Email("test@domain.com");
+    	final String authToken = insertAuthToken(email, mNow);
     	
     	// Now delete the auth token.
     	datastore.delete(KeyFactory.stringToKey(authToken));
     	try {
     		AccountsApi.validateAuthToken(datastore, authToken, mNow);
     		fail();
-    	} catch (InvalidAuthTokenException ex) {
+    	} catch (StatusCodes.InvalidAuthTokenException ex) {
     		// Expected path.
-    	} catch (AuthTokenExpiredException ex) {
-    		fail();
     	}
     }
     
     @Test
-    public void testValidateAuthToken_expired() {
-    	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    	final String emailAddress = "test@domain.com";
-    	final String authToken = insertAuthToken(emailAddress, mNow);
+    public void testValidateAuthToken_expired() throws InvalidAuthTokenException, AccountNotFoundException {
+    	DatastoreService datastore = getDatastore();
+    	final Email email = new Email("test@domain.com");
+    	final String authToken = insertAuthToken(email, mNow);
     	
-    	try {
-    		AccountsApi.validateAuthToken(datastore, authToken, new Date(BASE_TIME + AccountsApi.AUTH_TOKEN_LIFE +5l));
+		try {
+			AccountsApi.validateAuthToken(datastore, authToken, new Date(BASE_TIME + AccountsApi.AUTH_TOKEN_LIFE +5l));
     		fail();
-    	} catch (InvalidAuthTokenException ex) {
-    		fail();
-    	} catch (AuthTokenExpiredException ex) {
-    		// Expected path.
-    	}
+		} catch (SessionExpiredException e) {
+			// Expected path
+		}
     }
     
     @Test
-    public void testValidateAuthToken() {
-    	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    	final String emailAddress = "test@domain.com";
-    	final String authToken = insertAuthToken(emailAddress, mNow);
+    public void testValidateAuthToken() throws InvalidAuthTokenException, AccountNotFoundException,
+    		SessionExpiredException {
+    	DatastoreService datastore = getDatastore();
+    	final Email email = new Email("test@domain.com");
+    	final String authToken = insertAuthToken(email, mNow);
     	final Date testTime = new Date(BASE_TIME + (AccountsApi.AUTH_TOKEN_LIFE / 2));
     	
-    	try {
-    		AccountsApi.validateAuthToken(datastore, authToken, testTime);
-    	} catch (InvalidAuthTokenException ex) {
-    		fail();
-    	} catch (AuthTokenExpiredException ex) {
-        	fail();
-    	}
+		AccountsApi.validateAuthToken(datastore, authToken, testTime);
     }
     
     @Test
     public void testCreateAccount_alreadyUsedInAccount() {
-    	final String emailAddress = "test@domain.com";
+    	final Email email = new Email("test@domain.com");
     	final String password = "12345";
-    	insertAccount(emailAddress, password);
-    	CreateAccountReply reply = mAccountsApi.createAccount(emailAddress, password);
-    	assertEquals(StatusCodes.ACCOUNT_EMAIL_TAKEN, reply.getStatusCode());
+    	insertAccount(email, password);
+    	try {
+    		mAccountsApi.createAccount(email.getEmail(), password);
+    		fail();
+    	} catch (EmailTakenException ex) {
+    		// Expected path.
+    	}
     }
     
     @Test
     public void testCreateAccount_alreadyUsedInPendingAccount() {
-    	final String emailAddress = "test@domain.com";
+    	final Email email = new Email("test@domain.com");
     	final String password = "12345";
-    	insertPendingAccount(emailAddress, password, mNow);
-    	CreateAccountReply reply = mAccountsApi.createAccount(emailAddress, password);
-    	assertEquals(StatusCodes.ACCOUNT_EMAIL_TAKEN, reply.getStatusCode());
+    	insertPendingAccount(email, password, mNow);
+    	try {
+    		mAccountsApi.createAccount(email.getEmail(), password);
+    		fail();
+    	} catch (EmailTakenException ex) {
+    		// Expected path.
+    	}
     }
     
     @Test
-    public void testCreateAccount_successAlreadyUsedInPendingAccount() {
-    	final String emailAddress = "test@domain.com";
+    public void testCreateAccount_successAlreadyUsedInPendingAccount() throws EmailTakenException {
+    	final Email email = new Email("test@domain.com");
     	final String password = "12345";
-    	insertPendingAccount(emailAddress, password, mNow);
+    	insertPendingAccount(email, password, mNow);
     	
     	mNow.setTime(BASE_TIME + AccountsApi.PENDING_ACCOUNT_LIFE + 5l);
-    	CreateAccountReply reply = mAccountsApi.createAccount(emailAddress, password);
+    	BaseReply reply = mAccountsApi.createAccount(email.getEmail(), password);
     	assertEquals(StatusCodes.OK, reply.getStatusCode());
     }
     
     @Test
-    public void testCreateAccount() {
+    public void testCreateAccount() throws EmailTakenException {
     	final String emailAddress = "test@domain.com";
     	final String password = "12345";
-    	CreateAccountReply reply = mAccountsApi.createAccount(emailAddress, password);
+    	BaseReply reply = mAccountsApi.createAccount(emailAddress, password);
     	assertEquals(StatusCodes.OK, reply.getStatusCode());
     }
     
     @Test
-    public void testValidateAccount_accountNotFound() {
+    public void testValidateAccount_accountNotFound() throws IncorrectVerificationCodeException {
     	final String emailAddress = "test@domain.com";
     	final String password = "12345";
     	final int verificationCode = 1;
-    	ValidateAccountReply reply = mAccountsApi.validateAccount(emailAddress, password, verificationCode);
-    	assertEquals(StatusCodes.ACCOUNT_NOT_FOUND, reply.getStatusCode());
+    	try {
+    		mAccountsApi.validateAccount(emailAddress, password, verificationCode);
+    		fail();
+    	} catch (AccountNotFoundException ex) {
+    		// Expected path.
+    	}
     }
     
     @Test
-    public void testValidateAccount() {
-    	final String emailAddress = "test@domain.com";
+    public void testValidateAccount() throws AccountNotFoundException, IncorrectVerificationCodeException {
+    	DatastoreService datastore = getDatastore();
+    	final Email email = new Email("test@domain.com");
     	final String password = "12345";
-    	final int verificationCode = insertPendingAccount(emailAddress, password, mNow);
-    	ValidateAccountReply reply = mAccountsApi.validateAccount(emailAddress, password, verificationCode);
+    	final int verificationCode = insertPendingAccount(email, password, mNow);
+    	
+    	SignInReply reply = mAccountsApi.validateAccount(email.getEmail(), password, verificationCode);
+    	AccountEntity accountEntity = AccountEntity.findAccountEntity(datastore, email);
+    	
     	assertEquals(StatusCodes.OK, reply.getStatusCode());
-    	// TODO - verify that the pending account was removed and that the actual account was created.
+    	assertEquals(0, datastore.prepare(new Query(PendingAccountEntity.KIND)).countEntities(withLimit(1)));
+    	assertNotNull(accountEntity.getEntity());
+    	assertEquals(email, accountEntity.getEmailAddress());
+    	assertEquals(password, accountEntity.getPassword());
+    }
+    
+    @Test
+    public void testDeleteAccount() throws AccountNotFoundException, InvalidAuthTokenException,
+    		SessionExpiredException {
+    	final Email email = new Email("test@domain.com");
+    	final String password = "12345";
+    	insertAccount(email, password);
+    	final String authToken = insertAuthToken(email, mNow);
+    	mAccountsApi.deleteAccount(authToken);
     }
     
     @Test
     public void testRegenerateValidationCode_accountNotFound() {
-    	fail();
+    	final String emailAddress = "test@domain.com";
+    	final String password = "12345";
+    	try {
+    		mAccountsApi.regenerateValidationCode(emailAddress, password);
+    		fail();
+    	} catch (AccountNotFoundException ex) {
+    		// Expected path.
+    	}
     }
     
     @Test
-    public void testRegenerateValidationCode() {
-    	fail();
+    public void testRegenerateValidationCode() throws AccountNotFoundException {
+    	DatastoreService datastore = getDatastore();
+    	final Email email = new Email("test@domain.com");
+    	final String password = "12345";
+    	final int verificationCode = insertPendingAccount(email, password, mNow);
+    	mNow.setTime(BASE_TIME + 5l);
+    	BaseReply reply = mAccountsApi.regenerateValidationCode(email.getEmail(), password);
+    	PendingAccountEntity pendingAccount = PendingAccountEntity.findPendingAccountEntity(datastore, email, password);
+    	assertEquals(StatusCodes.OK, reply.getStatusCode());
+    	assertNotEquals(verificationCode, pendingAccount.getVerificationCode());
     }
     
     @Test
     public void testSignOut_authTokenAlreadyExpired() {
-    	fail();
+    	final Email email = new Email("test@domain.com");
+    	final String authToken = insertAuthToken(email, mNow);
+    	mNow.setTime(BASE_TIME + AccountsApi.AUTH_TOKEN_LIFE + 5l);
+    	BaseReply reply = mAccountsApi.signOut(authToken);
+    	assertEquals(StatusCodes.OK, reply.getStatusCode());
     }
     
     @Test
     public void testSignOut_authTokenNotFound() {
-    	fail();
+    	DatastoreService datastore = getDatastore();
+    	final Email email = new Email("test@domain.com");
+    	final String authToken = insertAuthToken(email, mNow);
+    	// Need to delete the auth token first.
+    	datastore.delete(KeyFactory.stringToKey(authToken));
+    	BaseReply reply = mAccountsApi.signOut(authToken);
+    	assertEquals(StatusCodes.OK, reply.getStatusCode());
     }
     
     @Test
     public void testSignOut() {
-    	fail();
+    	final Email email = new Email("test@domain.com");
+    	final String authToken = insertAuthToken(email, mNow);
+    	mNow.setTime(BASE_TIME + (AccountsApi.AUTH_TOKEN_LIFE / 2));
+    	BaseReply reply = mAccountsApi.signOut(authToken);
+    	assertEquals(StatusCodes.OK, reply.getStatusCode());
     }
     
-    private void insertAccount(String emailAddress, String password) {
-    	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    	AccountEntity accountEntity = new AccountEntity(emailAddress, password);
+    @Test
+    public void testGetAccount_accountNotFound() throws InvalidAuthTokenException, SessionExpiredException {
+    	final Email email = new Email("test@domain.com");
+    	final String authToken = insertAuthToken(email, mNow);
+    	try {
+    		mAccountsApi.getAccount(authToken);
+    		fail();
+    	} catch (StatusCodes.AccountNotFoundException ex) {
+    		// Expected path.
+    	}
+    }
+    
+    @Test
+    public void testGetAccount() throws AccountNotFoundException, InvalidAuthTokenException, SessionExpiredException {
+    	final Email email = new Email("test@domain.com");
+    	final String password = "12345";
+    	insertAccount(email, password);
+    	final String authToken = insertAuthToken(email, mNow);
+    	GetAccountReply reply = mAccountsApi.getAccount(authToken);
+    	assertEquals(StatusCodes.OK, reply.getStatusCode());
+    	assertEquals(email, reply.getAccountEntity().getEmailAddress());
+    	assertEquals(password, reply.getAccountEntity().getPassword());
+    }
+    
+    @Test
+    public void testModifyAccount() throws AccountNotFoundException, InvalidAuthTokenException,
+    		SessionExpiredException {
+    	final Email email = new Email("test@domain.com");
+    	final String password = "12345";
+    	final String names[] = new String[] {"Name 1", "Name 2"};
+    	final int accountTypes[] = new int[] { AccountType.BASIC, AccountType.LANDLORD };
+    	final PhoneNumber phoneNumbers[] = new PhoneNumber[] { new PhoneNumber("1234567890"),
+    			new PhoneNumber("0123456789") };
+    	final PostalAddress addresses[] = new PostalAddress[] {
+    			new PostalAddress("123 Fake Street, Gotham City Michigan, 48227"),
+    			new PostalAddress("124 Fake Street, Gotham City Michigan, 48227")
+    	};
+    	insertAccount(email, password, names[0], accountTypes[0], phoneNumbers[0], addresses[0]);
+    	final String authToken = insertAuthToken(email, mNow);
+
+    	DatastoreService datastore = getDatastore();
+    	GetAccountReply reply = mAccountsApi.modifyAccount(authToken, password, names[1], accountTypes[1],
+    			phoneNumbers[1].getNumber(), addresses[1].getAddress());
+    	AccountEntity accountEntity = AccountEntity.findAccountEntity(datastore, email);
+    	assertEquals(StatusCodes.OK, reply.getStatusCode());
+    	assertEquals(names[1], accountEntity.getName());
+    	assertEquals(names[1], reply.getAccountEntity().getName());
+    	assertEquals(accountTypes[1], accountEntity.getAccountType());
+    	assertEquals(accountTypes[1], reply.getAccountEntity().getAccountType());
+    	assertEquals(phoneNumbers[1], accountEntity.getPhoneNumber());
+    	assertEquals(phoneNumbers[1], reply.getAccountEntity().getPhoneNumber());
+    	assertEquals(addresses[1], accountEntity.getAddress());
+    	assertEquals(addresses[1], reply.getAccountEntity().getAddress());
+    }
+    
+    @Test
+    public void testResetPasswordRequest_accountNotFound() {
+    	final Email email = new Email("test@domain.com");
+    	try {
+			mAccountsApi.resetPasswordRequest(email.getEmail());
+			fail();
+		} catch (AccountNotFoundException e) {
+			// Expected path.
+		}
+    }
+    
+    @Test
+    public void testResetPasswordRequest_overrideValidationCode() throws AccountNotFoundException {
+    	DatastoreService datastore = getDatastore();
+    	final Email email = new Email("test@domain.com");
+    	final String password = "12345";
+    	final int verificationCode = insertPasswordResetEntity(email, new Random(mNow.getTime()).nextInt());
+    	insertAccount(email, password);
+    	mNow.setTime(BASE_TIME + 5l);
+    	BaseReply reply = mAccountsApi.resetPasswordRequest(email.getEmail());
+    	PasswordResetEntity passwordReset = PasswordResetEntity.findPasswordResetEntity(datastore, email);
+    	assertEquals(StatusCodes.OK, reply.getStatusCode());
+    	assertNotEquals(verificationCode, passwordReset.getVerificationCode());
+    }
+    
+    @Test
+    public void testResetPasswordRequest() throws AccountNotFoundException {
+    	DatastoreService datastore = getDatastore();
+    	final Email email = new Email("test@domain.com");
+    	final String password = "12345";
+    	insertAccount(email, password);
+    	BaseReply reply = mAccountsApi.resetPasswordRequest(email.getEmail());
+    	PasswordResetEntity passwordReset = PasswordResetEntity.findPasswordResetEntity(datastore, email);
+    	assertEquals(StatusCodes.OK, reply.getStatusCode());
+    	assertNotNull(passwordReset.getEntity());
+    }
+    
+    @Test
+    public void testResetPassword_accountNotFound() throws GenericInternalError, IncorrectVerificationCodeException {
+    	final Email email = new Email("test@domain.com");
+    	final int verificationCode = 1000;
+    	final String newPassword = "54321";
+    	try {
+			mAccountsApi.resetPassword(email.getEmail(), verificationCode, newPassword);
+			fail();
+		} catch (AccountNotFoundException e) {
+			// Expected path.
+		}
+    }
+    
+    @Test
+    public void testResetPassword_resetEntityNotFound() throws AccountNotFoundException,
+    		IncorrectVerificationCodeException {
+    	final Email email = new Email("test@domain.com");
+    	final String oldPassword = "12345";
+    	final int verificationCode = 1000;
+    	final String newPassword = "54321";
+    	insertAccount(email, oldPassword);
+    	try {
+			mAccountsApi.resetPassword(email.getEmail(), verificationCode, newPassword);
+			fail();
+		} catch (GenericInternalError e) {
+			// Expected path.
+		}
+    }
+    
+    @Test
+    public void testResetPassword_incorrectVerificationCode() throws AccountNotFoundException, GenericInternalError {
+    	final Email email = new Email("test@domain.com");
+    	final String oldPassword = "12345";
+    	final int verificationCode = insertPasswordResetEntity(email, new Random(mNow.getTime()).nextInt());
+    	final String newPassword = "54321";
+    	insertAccount(email, oldPassword);
+    	try {
+			mAccountsApi.resetPassword(email.getEmail(), verificationCode + 1, newPassword);
+			fail();
+		} catch (IncorrectVerificationCodeException e) {
+			// Expected path.
+		}
+    }
+    
+    @Test
+    public void testResetPassword() throws AccountNotFoundException, GenericInternalError,
+    		IncorrectVerificationCodeException {
+    	final Email email = new Email("test@domain.com");
+    	final String oldPassword = "12345";
+    	final int verificationCode = insertPasswordResetEntity(email, new Random(mNow.getTime()).nextInt());
+    	final String newPassword = "54321";
+    	insertAccount(email, oldPassword);
+    	BaseReply reply = mAccountsApi.resetPassword(email.getEmail(), verificationCode, newPassword);
+    	AccountEntity account = AccountEntity.findAccountEntity(getDatastore(), email);
+    	assertEquals(StatusCodes.OK, reply.getStatusCode());
+    	assertNotNull(account.getEntity());
+    	assertEquals(newPassword, account.getPassword());
+    }
+    
+    private void insertAccount(Email email, String password) {
+    	insertAccount(email, password, null /* name */, null /* accountType */, null /* phoneNumber */,
+    			null /* address */);
+    }
+    
+    private void insertAccount(Email email, String password, String name, Integer accountType, PhoneNumber phoneNumber,
+    		PostalAddress address) {
+    	DatastoreService datastore = getDatastore();
+    	AccountEntity accountEntity = new AccountEntity(email, password);
+    	if (name != null) {
+    		accountEntity.setName(name);
+    	}
+    	if (accountType != null) {
+    		accountEntity.setAccountType(accountType);
+    	}
+    	if (phoneNumber != null) {
+    		accountEntity.setPhoneNumber(phoneNumber);
+    	}
+    	if (address != null) {
+    		accountEntity.setAddress(address);
+    	}
     	datastore.put(accountEntity.getEntity());
     }
     
-    private int insertPendingAccount(String emailAddress, String password, Date timestamp) {
-    	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    	PendingAccountEntity pendingAccountEntity = new PendingAccountEntity(emailAddress, password, timestamp);
+    private int insertPendingAccount(Email email, String password, Date timestamp) {
+    	DatastoreService datastore = getDatastore();
+    	PendingAccountEntity pendingAccountEntity = new PendingAccountEntity(email, password, timestamp);
     	datastore.put(pendingAccountEntity.getEntity());
     	return pendingAccountEntity.getVerificationCode();
     }
     
-    private String insertAuthToken(String emailAddress, Date date) {
-    	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    	AuthTokenEntity authToken = new AuthTokenEntity(emailAddress, date);
+    private String insertAuthToken(Email email, Date date) {
+    	DatastoreService datastore = getDatastore();
+    	AuthTokenEntity authToken = new AuthTokenEntity(email, date);
     	datastore.put(authToken.getEntity());
     	return authToken.getKeyString();
+    }
+    
+    private int insertPasswordResetEntity(Email email, int verificationCode) {
+    	DatastoreService datastore = getDatastore();
+    	PasswordResetEntity passwordReset = new PasswordResetEntity(email, verificationCode);
+    	datastore.put(passwordReset.getEntity());
+    	return passwordReset.getVerificationCode();
+    }
+    
+    private final DatastoreService getDatastore() {
+    	return DatastoreServiceFactory.getDatastoreService();
     }
 }
