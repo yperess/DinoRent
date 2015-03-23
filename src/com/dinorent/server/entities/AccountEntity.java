@@ -7,8 +7,6 @@ import com.google.api.server.spi.config.ApiResourceProperty;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.PostalAddress;
 import com.google.appengine.api.datastore.PhoneNumber;
 import com.google.appengine.api.datastore.Email;
