@@ -1,4 +1,7 @@
 $(document).ready(function() {
+	// Save any original state needed:
+	$("#signUpCard").data("originalHeight", parseInt($("#signUpCard").css("height"), 10));
+	
 	$("html").click(function() {
 		dinorent.ui.hideAllContainers(false /* hideLoadingScreen */);
 	});
@@ -32,9 +35,6 @@ $(document).ready(function() {
 		$("#signInCard").animate({width:'hide'}, 350);
 		$("#signUpCard").animate({width:'show'}, 350);
 		event.stopPropagation();
-	});
-	$("#signUpCard").on("show", function() {
-		dinorent.ui.updateSignUpCardHeight();
 	});
 	$("#sign-up").click(function(event) {
 		event.stopPropagation();
@@ -108,6 +108,7 @@ dinorent.ui.setLoadingVisible = function(visible) {
 dinorent.ui.hideAllContainers = function(hideLoadingScreen) {
 	$("#signInMenu").slideUp();
 	$(".MainMenu").animate({width:'hide'},350);
+	dinorent.ui.resetSignUpCard();
 	if (hideLoadingScreen) {
 		$("#loadingScreen").hide();
 	}
@@ -121,7 +122,17 @@ dinorent.ui.hideAllContainers = function(hideLoadingScreen) {
 dinorent.ui.updateSignUpCardHeight = function() {
 	var headerHeight = $("#signUpCard > h1").outerHeight(true /* includeMargins */);
 	var formHeight = $("#signUpCard > form").outerHeight(true /* includeMargins */);
-	$("#signUpCard").height(headerHeight + formHeight);
+	var height = Math.max(headerHeight + formHeight, $("#signUpCard").data("originalHeight"));
+	$("#signUpCard").height(height);
+}
+
+/**
+ * Clear the sign-up card input fields.
+ */
+dinorent.ui.resetSignUpCard = function() {
+	$("#signUpCard input[type=email], #signUpCard input[type=password]").val("");
+	$("#signUpCard .ErrorMessage").hide();
+	$("#signUpCard").animate({height: $("#signUpCard").data("originalHeight")}, 350);
 }
 
 /**
