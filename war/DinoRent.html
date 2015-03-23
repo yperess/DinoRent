@@ -89,7 +89,7 @@
   
   <!-- The sign-in menu -->
   <div id="signInMenu" class="FullScreenContainer">
-    <div class="Card">
+    <div class="Card" id="signInCard">
       <form onsubmit="return false;">
         <input id="sign-in-email" name="sign-in-email" type="email" placeholder="Email" spellcheck="false"/>
         <input id="sign-in-password" name="sign-in-password" type="password" placeholder="Password" spellcheck="false"/>
@@ -97,6 +97,24 @@
       </form>
       <a href="#" id="sign-in-help">Need help?</a>
       <a href="#" id="sign-in-create-account">Create account</a>
+    </div>
+    <div class="Card" id="signUpCard">
+      <h1 class="Centered">Create Account</h1>
+      <form onsubmit="return false;">
+        <input id="sign-up-email" name="sign-up-email" type="email" placeholder="Email" spellcheck="false"/>
+        <div class="ErrorMessage" for="sign-up-email">* Invalid email address</div>
+        <input id="sign-up-password" name="sign-up-password" type="password" placeholder="Password" spellcheck="false"/>
+        <div class="ErrorMessage" for="sign-up-password">
+          * Invalid password, passwords must be:<br/>
+          <ul>
+            <li>8+ characters.</li>
+            <li>Be entirely alpha numeric (no special characters).</li>
+          </ul>
+        </div>
+        <input id="sign-up-password-confirm" name="sign-up-password-confirm" type="password" placeholder="Confirm password" spellcheck="false"/>
+        <div class="ErrorMessage" for="sign-up-password-confirm">* Must match the password provided</div>
+        <input id="sign-up" class="ActionButton" name="sign-up" type="submit" value="Sign up"/>
+      </form>
     </div>
   </div>
   
@@ -119,10 +137,6 @@
         <td colspan="2" style="color: red;" id="errorLabelContainer"></td>
       </tr>
     </table>
-    <div>gapi.client.accounts: <span id="accounts"></span></div>
-    <div>gapi.client.accounts.foo: <span id="foo"></span></div>
-    <button id="foo-button">accounts.foo()</button>
-    <button id="bar-button">accounts.bar()</button>
   </div>
   
   <!-- Load the main JS. -->

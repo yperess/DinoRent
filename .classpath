@@ -10,9 +10,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/appengine-api-stubs.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/appengine-api-labs.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/appengine-api.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/appengine-testing.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Yuval/workspace/DinoRent/test/lib/appengine-api-labs.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Yuval/workspace/DinoRent/test/lib/appengine-api-stubs.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Yuval/workspace/DinoRent/test/lib/appengine-testing.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

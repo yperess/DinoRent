@@ -20,7 +20,6 @@ import com.dinorent.server.util.StatusCodes.GenericInternalError;
 import com.dinorent.server.util.StatusCodes.IncorrectVerificationCodeException;
 import com.dinorent.server.util.StatusCodes.InvalidAuthTokenException;
 import com.dinorent.server.util.StatusCodes.SessionExpiredException;
-import com.google.api.server.spi.ServiceException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Email;
@@ -79,7 +78,7 @@ public class AccountsApiTest {
     	final String emailAddress = "test@domain.com";
     	final String password = "12345";
     	try {
-    		SignInReply reply = mAccountsApi.signIn(emailAddress, password);
+    		mAccountsApi.signIn(emailAddress, password);
     		fail();
     	} catch (StatusCodes.AccountNotFoundException ex) {
     		// Expected path.
