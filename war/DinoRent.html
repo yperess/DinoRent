@@ -116,6 +116,15 @@
         <input id="sign-up" class="ActionButton" name="sign-up" type="submit" value="Sign up"/>
       </form>
     </div>
+    <div class="Card" id="passwordRecoverCard">
+      <h1 class="Centered">Forgot Password?</h1>
+      <h2 class="Centered">Enter your email address and get a recovery verification code to reset your password.</h2>
+      <form onsubmit="return false;">
+        <input id="password-recover-email" name="password-recover-email" type="email" placeholder="Email" spellcheck="false"/>
+        <div class="ErrorMessage" for="password-recover-email">* Invalid email address</div>
+        <input id="password-recover" class="ActionButton" name="password-recover" type="submit" value="Recover password"/>
+      </form>
+    </div>
   </div>
   
   <!-- The account recovery card -->
