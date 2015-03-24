@@ -1,6 +1,7 @@
 $(document).ready(function() {
 	// Save any original state needed:
 	$("#signUpCard").data("originalHeight", parseInt($("#signUpCard").css("height"), 10));
+	$("#passwordRecoverCard").data("originalHeight", parseInt($("#passwordRecoverCard").css("height"), 10));
 	
 	$("html").click(function() {
 		dinorent.ui.hideAllContainers(false /* hideLoadingScreen */);
@@ -17,6 +18,7 @@ $(document).ready(function() {
 	$(".SignInButton").click(function(event) {
 		$("#signInCard").show();
 		$("#signUpCard").hide();
+		$("#passwordRecoverCard").hide();
 		$(".MainMenu").animate({width:'hide'},350);
 		$("#signInMenu").slideToggle();
 		event.stopPropagation();
@@ -36,10 +38,34 @@ $(document).ready(function() {
 		$("#signUpCard").animate({width:'show'}, 350);
 		event.stopPropagation();
 	});
+	$("#sign-in-help").click(function(event) {
+		$("#signInCard").animate({width:'hide'}, 350);
+		$("#passwordRecoverCard").animate({width:'show'}, 350);
+		event.stopPropagation();
+	});
+	$("#password-recover").click(function(event) {
+		event.stopPropagation();
+		$("#passwordRecoverCard .ErrorMessage").hide();
+		dinorent.ui.updateSignUpCardHeight($("#passwordRecoverCard"));
+		// Validate the inputs.
+		var email = $("#password-recover-email").val();
+		var numErrors = 0;
+		if (!dinorent.utils.isEmailValid(email)) {
+			numErrors++;
+			$(".ErrorMessage[for=password-recover-email]").show();
+		}
+		if (numErrors != 0) {
+			dinorent.ui.updateSignUpCardHeight($("#passwordRecoverCard"));
+			dinorent.ui.setLoadingVisible(false);
+			return;
+		}
+		// TODO - call the password recovery API.
+		dinorent.ui.hideAllContainers(true /* hideLoadingScreen */);
+	});
 	$("#sign-up").click(function(event) {
 		event.stopPropagation();
-		$(".ErrorMessage").hide();
-		dinorent.ui.updateSignUpCardHeight();
+		$("#signUpCard .ErrorMessage").hide();
+		dinorent.ui.updateSignUpCardHeight($("#signUpCard"));
 		dinorent.ui.setLoadingVisible(true);
 		// Validate the inputs.
 		var email = $("#sign-up-email").val();
@@ -59,7 +85,7 @@ $(document).ready(function() {
 			$(".ErrorMessage[for=sign-up-password-confirm]").show();
 		}
 		if (numErrors != 0) {
-			dinorent.ui.updateSignUpCardHeight();
+			dinorent.ui.updateSignUpCardHeight($("#signUpCard"));
 			dinorent.ui.setLoadingVisible(false);
 			return;
 		}
@@ -119,11 +145,13 @@ dinorent.ui.hideAllContainers = function(hideLoadingScreen) {
  * TODO - consider making this a generic function that takes an element and calculates its children's height plus
  * its padding.
  */
-dinorent.ui.updateSignUpCardHeight = function() {
-	var headerHeight = $("#signUpCard > h1").outerHeight(true /* includeMargins */);
-	var formHeight = $("#signUpCard > form").outerHeight(true /* includeMargins */);
-	var height = Math.max(headerHeight + formHeight, $("#signUpCard").data("originalHeight"));
-	$("#signUpCard").height(height);
+dinorent.ui.updateSignUpCardHeight = function(card) {
+	var childHeight = 0;
+	card.children().each(function() {
+		childHeight += $(this).outerHeight(true /* includeMargins */);
+	});
+	var height = Math.max(childHeight, card.data("originalHeight"));
+	card.height(height);
 }
 
 /**
