@@ -112,6 +112,28 @@ dinorent.utils = dinorent.utils || {};
 /** Constant for the API root. */
 dinorent.constants.API_ROOT = "https://dino-rent.appspot.com/_ah/api";
 
+/** Object version of the url query. */
+dinorent.constants.URL_QUERY = (function(query) {
+	/* parse the query */
+	var x = query.replace(/;/g, '&').split('&'), i, name, t;
+	/* query changes from string version of query to object */
+	for (query={}, i=0; i<x.length; i++) {
+		t = x[i].split('=', 2);
+		name = decodeURI(t[0]);
+		if (!query[name]) {
+			query[name] = [];
+		}
+		if (t.length > 1) {
+			query[name][query[name].length] = decodeURI(t[1]);
+		} else {
+			// nonstandard - sets variables with no value to true.
+			query[name][query[name].length] = true;
+		}
+	}
+	return query;
+})(location.search.substring(1).replace(/\+/g, ' '));
+
+
 /**
  * Show or hide the loading progress bar.
  * 
