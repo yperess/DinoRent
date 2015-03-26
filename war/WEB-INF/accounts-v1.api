@@ -46,48 +46,6 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "accounts.signOut" : {
-      "path" : "signOut/{authToken}",
-      "httpMethod" : "POST",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.dinorent.server.AccountsApi.signOut",
-      "request" : {
-        "parameters" : {
-          "authToken" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "accounts.deleteAccount" : {
-      "path" : "account/{authToken}",
-      "httpMethod" : "DELETE",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.dinorent.server.AccountsApi.deleteAccount",
-      "request" : {
-        "parameters" : {
-          "authToken" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
     "accounts.validateAccount" : {
       "path" : "validateAccount/{emailAddress}/{password}/{verificationCode}",
       "httpMethod" : "POST",
@@ -117,43 +75,14 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "accounts.resetPassword" : {
-      "path" : "resetPassword/{emailAddress}/{verificationCode}/{password}",
+    "accounts.createAccount" : {
+      "path" : "createAccount/{emailAddress}/{password}",
       "httpMethod" : "POST",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ ],
       "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.dinorent.server.AccountsApi.resetPassword",
-      "request" : {
-        "parameters" : {
-          "emailAddress" : {
-            "type" : "string",
-            "required" : true
-          },
-          "verificationCode" : {
-            "type" : "int32",
-            "required" : true
-          },
-          "password" : {
-            "type" : "string",
-            "required" : true
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "accounts.signIn" : {
-      "path" : "signIn/{emailAddress}/{password}",
-      "httpMethod" : "POST",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.dinorent.server.AccountsApi.signIn",
+      "rosyMethod" : "com.dinorent.server.AccountsApi.createAccount",
       "request" : {
         "parameters" : {
           "emailAddress" : {
@@ -212,18 +141,89 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "accounts.createAccount" : {
-      "path" : "createAccount/{emailAddress}/{password}",
+    "accounts.signOut" : {
+      "path" : "signOut/{authToken}",
       "httpMethod" : "POST",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ ],
       "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.dinorent.server.AccountsApi.createAccount",
+      "rosyMethod" : "com.dinorent.server.AccountsApi.signOut",
+      "request" : {
+        "parameters" : {
+          "authToken" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "accounts.deleteAccount" : {
+      "path" : "account/{authToken}",
+      "httpMethod" : "DELETE",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.dinorent.server.AccountsApi.deleteAccount",
+      "request" : {
+        "parameters" : {
+          "authToken" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "accounts.signIn" : {
+      "path" : "signIn/{emailAddress}/{password}",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.dinorent.server.AccountsApi.signIn",
       "request" : {
         "parameters" : {
           "emailAddress" : {
             "type" : "string",
+            "required" : true
+          },
+          "password" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "accounts.resetPassword" : {
+      "path" : "resetPassword/{emailAddress}/{verificationCode}/{password}",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.dinorent.server.AccountsApi.resetPassword",
+      "request" : {
+        "parameters" : {
+          "emailAddress" : {
+            "type" : "string",
+            "required" : true
+          },
+          "verificationCode" : {
+            "type" : "int32",
             "required" : true
           },
           "password" : {
@@ -308,14 +308,14 @@
           "name" : {
             "type" : "string"
           },
-          "accountType" : {
-            "type" : "integer"
-          },
           "phoneNumber" : {
             "$ref" : "PhoneNumber"
           },
           "emailAddress" : {
             "$ref" : "Email"
+          },
+          "accountType" : {
+            "type" : "integer"
           },
           "entity" : {
             "$ref" : "Entity"
@@ -411,15 +411,6 @@
         "id" : "JsonMap",
         "type" : "object"
       },
-      "BaseReply" : {
-        "id" : "BaseReply",
-        "type" : "object",
-        "properties" : {
-          "statusCode" : {
-            "type" : "integer"
-          }
-        }
-      },
       "SignInReply" : {
         "id" : "SignInReply",
         "type" : "object",
@@ -431,10 +422,34 @@
             "type" : "integer"
           }
         }
+      },
+      "BaseReply" : {
+        "id" : "BaseReply",
+        "type" : "object",
+        "properties" : {
+          "statusCode" : {
+            "type" : "integer"
+          }
+        }
       }
     },
     "methods" : {
       "com.dinorent.server.AccountsApi.getAccount" : {
+        "response" : {
+          "$ref" : "GetAccountReply"
+        }
+      },
+      "com.dinorent.server.AccountsApi.validateAccount" : {
+        "response" : {
+          "$ref" : "SignInReply"
+        }
+      },
+      "com.dinorent.server.AccountsApi.createAccount" : {
+        "response" : {
+          "$ref" : "BaseReply"
+        }
+      },
+      "com.dinorent.server.AccountsApi.modifyAccount" : {
         "response" : {
           "$ref" : "GetAccountReply"
         }
@@ -449,27 +464,12 @@
           "$ref" : "BaseReply"
         }
       },
-      "com.dinorent.server.AccountsApi.validateAccount" : {
-        "response" : {
-          "$ref" : "SignInReply"
-        }
-      },
-      "com.dinorent.server.AccountsApi.resetPassword" : {
-        "response" : {
-          "$ref" : "BaseReply"
-        }
-      },
       "com.dinorent.server.AccountsApi.signIn" : {
         "response" : {
           "$ref" : "SignInReply"
         }
       },
-      "com.dinorent.server.AccountsApi.modifyAccount" : {
-        "response" : {
-          "$ref" : "GetAccountReply"
-        }
-      },
-      "com.dinorent.server.AccountsApi.createAccount" : {
+      "com.dinorent.server.AccountsApi.resetPassword" : {
         "response" : {
           "$ref" : "BaseReply"
         }

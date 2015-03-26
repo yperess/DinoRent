@@ -1,2 +1,3 @@
 # Module dinorent
 # RPC service class, partial path of RPC policy file
+com.dinorent.client.GreetingService, 2483428A8494CE689DE3049F6BA89A9B.gwt.rpc
