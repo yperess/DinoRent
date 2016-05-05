@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package com.dinorent.proto;
+
+message UserData {
+  enum AccountType {
+    TENANT = 0;
+    LANDLORD = 1;
+  }
+  AccountType account_type = 1;
+}

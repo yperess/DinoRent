@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.7.7'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'com.google.protobuf'
+
+sourceSets {
+    main {
+        proto {
+            // src/main/proto is included by default.
+        }
+    }
+}
+
+def protobufDep = 'com.google.protobuf:protobuf-java:3.0.0-alpha-3'
+def protobufNanoDep = 'com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-3'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile protobufDep
+    compile protobufNanoDep
+    protobuf fileTree("proto/")
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.0.0-alpha-3'
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:0.7.0'
+        }
+    }
+    generatedFilesBaseDir = "$projectDir/src/generated"
+    generateProtoTasks {
+        ofSourceSet('main')*.builtins {
+            remove java
+            javanano {
+                option 'java_multiple_files=true'
+            }
+        }
+    }
+}
+// To include all sourceSets in the project jar
+jar {
+    sourceSets.all { sourceSet ->
+        from sourceSet.output
+        dependsOn sourceSet.getCompileTaskName('java')
+    }
+}
